@@ -1,0 +1,53 @@
+ Design and implement an Auth REST API service
+Requirements
+1. Sign up (creation of user) using email and password
+2. Sign in
+a. Authentication of user credentials
+b. A token is returned as response preferably JWT
+3. Authorization of token
+a. Mechanism of sending token along with a request from client to service
+b. Should check for expiry
+c. Error handling (proper error codes in each failure scenario)
+4. Revocation of token
+a. Mechanism of revoking a token from backend
+5. Mechanism to refresh a token
+a. Client should be able to renew the token before it expires
+Submission
+1. Push all files in a github repository and share link
+2. You can use any programming language (e.g. go, java, python) except java script
+3. You can use memory store, file store or a database for storing token and use details
+4. Share curl commands to test each use case
+5. We should be able to start your REST API service using one command otherwise your
+assignment will not be checked. Docker compose can be used to package
+dependencies and database etc.
+6. Run command and test curl commands to be shared in ReadMe file in same repository
+7. Your assignment should implement at-least 4 out of 5 tasks. If you can implement all 5, it
+is a plus.
+
+Implementation:
+
+This API service is implemented using:
+- Go (Golang) for the backend
+- Gin web framework for REST endpoints
+- GORM as ORM for MySQL database
+- MySQL for persistent storage
+- JWT for authentication tokens
+
+Project Structure:
+
+auth-api/
+├── main.go # Main entry point
+├── config # Configuration settings
+├── models # Database models
+├── routes # REST endpoints
+├── middleware # Authentication and authorization middleware
+├── utils # Utility functions
+└── README.md # Project documentation
+
+
+
+
+
+
+
+
