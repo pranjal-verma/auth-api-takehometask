@@ -1,6 +1,10 @@
 # Auth API Service
 
 A REST API service for user authentication and authorization using JWT tokens.
+To run ther serivce
+```bash
+docker compose up --build
+```
 
 ## Features
 
