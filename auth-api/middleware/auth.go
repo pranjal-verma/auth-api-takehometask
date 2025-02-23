@@ -1,14 +1,22 @@
 package middleware
 
 import (
-	"auth-api/utils"
+	"auth-api/core"
 	"net/http"
 	"strings"
 
 	"github.com/gin-gonic/gin"
 )
 
-func AuthRequired() gin.HandlerFunc {
+type AuthMiddleware struct {
+	tokenService core.TokenService
+}
+
+func NewAuthMiddleware(tokenService core.TokenService) *AuthMiddleware {
+	return &AuthMiddleware{tokenService: tokenService}
+}
+
+func (m *AuthMiddleware) AuthRequired() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		authHeader := c.GetHeader("Authorization")
 		if authHeader == "" {
@@ -26,7 +34,7 @@ func AuthRequired() gin.HandlerFunc {
 		}
 
 		token := parts[1]
-		claims, err := utils.ValidateToken(token)
+		claims, err := m.tokenService.ValidateToken(token)
 		if err != nil {
 			c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid or expired token"})
 			c.Abort()

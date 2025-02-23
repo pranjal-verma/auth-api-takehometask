@@ -11,7 +11,8 @@ const (
 	RefreshTokenDuration = time.Hour * 24 * 7
 
 	// Database settings
-	DBHost     = "db"
+	// DBHost     = "db"
+	DBHost     = "localhost"
 	DBUser     = "root"
 	DBPassword = "password"
 	DBName     = "auth_api"

@@ -1,84 +1,63 @@
 package handlers
 
 import (
-	"auth-api/models"
-	"auth-api/utils"
+	"auth-api/core"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
-	"gorm.io/gorm"
 )
 
-var db *gorm.DB
-
-// Initialize sets up the database connection
-func Initialize(database *gorm.DB) {
-	db = database
+type AuthHandler struct {
+	authService core.AuthService
 }
 
-func Signup(c *gin.Context) {
-	var input struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required,min=6"`
-	}
+type CreateUserInput struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required,min=6"`
+}
+type UserResponse struct {
+	Email string `json:"email"`
+	ID    uint   `json:"id"`
+}
+
+type SigninInput struct {
+	Email    string `json:"email" binding:"required,email"`
+	Password string `json:"password" binding:"required"`
+}
+
+func (ah *AuthHandler) Signup(c *gin.Context) {
+
+	var input CreateUserInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	// Hash password
-	hashedPassword, err := utils.HashPassword(input.Password)
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to hash password"})
-		return
-	}
-
-	user := models.User{
+	user, err := ah.authService.CreateUser(core.User{
 		Email:    input.Email,
-		Password: hashedPassword,
-	}
+		Password: input.Password,
+	})
 
-	if err := db.Create(&user).Error; err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "Email already exists"})
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
 		return
 	}
 
-	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully"})
+	c.JSON(http.StatusCreated, gin.H{"message": "User created successfully ", "email": user.Email})
 }
 
-func Signin(c *gin.Context) {
-	var input struct {
-		Email    string `json:"email" binding:"required,email"`
-		Password string `json:"password" binding:"required"`
-	}
+func (ah *AuthHandler) Signin(c *gin.Context) {
+	var input SigninInput
 
 	if err := c.ShouldBindJSON(&input); err != nil {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
 
-	var user models.User
-	if err := db.Where("email = ?", input.Email).First(&user).Error; err != nil {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
-
-	if !utils.CheckPassword(input.Password, user.Password) {
-		c.JSON(http.StatusUnauthorized, gin.H{"error": "Invalid credentials"})
-		return
-	}
-
-	// Generate tokens
-	accessToken, err := utils.GenerateToken(user.ID, "access")
+	accessToken, refreshToken, err := ah.authService.Authenticate(input.Email, input.Password)
 	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate access token"})
-		return
-	}
-
-	refreshToken, err := utils.GenerateToken(user.ID, "refresh")
-	if err != nil {
-		c.JSON(http.StatusInternalServerError, gin.H{"error": "Failed to generate refresh token"})
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
 		return
 	}
 
@@ -86,4 +65,9 @@ func Signin(c *gin.Context) {
 		"access_token":  accessToken,
 		"refresh_token": refreshToken,
 	})
+
+}
+
+func NewAuthHandler(authService core.AuthService) *AuthHandler {
+	return &AuthHandler{authService: authService}
 }
