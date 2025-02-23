@@ -9,6 +9,7 @@ import (
 	"gorm.io/gorm"
 )
 
+// TODO: use Factory pattern to initialize the database
 func Initialize() (*gorm.DB, error) {
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%s)/%s?charset=utf8mb4&parseTime=True&loc=Local",
 		config.DBUser,

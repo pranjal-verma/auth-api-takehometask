@@ -3,7 +3,7 @@
 A REST API service for user authentication and authorization using JWT tokens.
 To run ther serivce
 ```bash
-docker compose up --build
+docker-compose up --build
 ```
 
 ## Features
@@ -24,7 +24,7 @@ docker compose up --build
     
 - POST /api/auth/signin
 - POST /api/auth/refresh
-- GET /api/auth/check
+- GET /api/auth/check (protected)
 
 ## Configuration
 
@@ -64,4 +64,4 @@ curl --location 'http://localhost:8080/api/auth/check' \
 --header 'Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJVc2VySUQiOjEsIlR5cGUiOiJhY2Nlc3MiLCJleHAiOjE3NDAzMTQzMjIsImlhdCI6MTc0MDMxNDI2Mn0.mRgoCq1JjkoKelTBmQb6xvUd5vmV8tjEtIn7r6UgnZo'
 ```
 
-<!-- @import "[TOC]" {cmd="toc" depthFrom=1 depthTo=6 orderedList=false} -->
+
