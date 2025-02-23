@@ -4,6 +4,7 @@ import (
 	"time"
 )
 
+// TODO: move to env variables
 const (
 	// JWT settings
 	JWTSecretKey         = "your-secret-key" // Change this in production
@@ -11,8 +12,8 @@ const (
 	RefreshTokenDuration = time.Hour * 24 * 7
 
 	// Database settings
-	// DBHost     = "db"
-	DBHost     = "localhost"
+	DBHost = "db"
+	// DBHost     = "localhost"
 	DBUser     = "root"
 	DBPassword = "password"
 	DBName     = "auth_api"
