@@ -3,6 +3,7 @@
 A REST API service for user authentication and authorization using JWT tokens.
 To run ther serivce
 ```bash
+cd auth-api
 docker-compose up --build
 ```
 
