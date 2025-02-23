@@ -1,13 +1,9 @@
 package core
 
 import (
-	"auth-api/config"
 	"auth-api/utils"
-	"errors"
 	"fmt"
 	"time"
-
-	"github.com/golang-jwt/jwt/v5"
 )
 
 type User struct {
@@ -66,7 +62,7 @@ func (as *authServiceImpl) GetUserByEmail(email string) (User, error) {
 	return as.userRepo.GetUserByEmail(email)
 }
 func (as *authServiceImpl) RefreshToken(refreshToken string) (string, error) {
-	claims, err := ValidateToken(refreshToken)
+	claims, err := as.tokenService.ValidateToken(refreshToken)
 	if err != nil {
 		return "", err
 	}
@@ -74,42 +70,11 @@ func (as *authServiceImpl) RefreshToken(refreshToken string) (string, error) {
 	if claims.ExpiresAt.Before(time.Now()) {
 		return "", fmt.Errorf("refresh token expired")
 	}
-	return GenerateToken(claims.UserID, "access")
-}
-
-func GenerateToken(userID uint, tokenType string) (string, error) {
-	duration := config.AccessTokenDuration
-	if tokenType == "refresh" {
-		duration = config.RefreshTokenDuration
-	}
-
-	claims := Claims{
-		UserID: userID,
-		Type:   tokenType,
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(duration)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
-	}
-
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(config.JWTSecretKey))
-}
-
-func ValidateToken(tokenString string) (*Claims, error) {
-	token, err := jwt.ParseWithClaims(tokenString, &Claims{}, func(token *jwt.Token) (interface{}, error) {
-		return []byte(config.JWTSecretKey), nil
-	})
-
+	accessToken, _, err := as.tokenService.GenerateTokenPair(claims.UserID)
 	if err != nil {
-		return nil, err
+		return "", err
 	}
-
-	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
-		return claims, nil
-	}
-
-	return nil, errors.New("invalid token")
+	return accessToken, nil
 }
 
 func NewAuthService(userRepo UserRepository, tokenService TokenService) AuthService {

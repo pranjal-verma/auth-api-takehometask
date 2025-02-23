@@ -68,6 +68,22 @@ func (ah *AuthHandler) Signin(c *gin.Context) {
 
 }
 
+func (ah *AuthHandler) RefreshToken(c *gin.Context) {
+	token := c.GetHeader("Authorization")
+
+	newAccessToken, err := ah.authService.RefreshToken(token)
+	if err != nil {
+		c.JSON(http.StatusUnauthorized, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{"access_token": newAccessToken})
+}
+
+func (ah *AuthHandler) Ping(c *gin.Context) {
+	c.JSON(http.StatusOK, gin.H{"message": "pong"})
+}
+
 func NewAuthHandler(authService core.AuthService) *AuthHandler {
 	return &AuthHandler{authService: authService}
 }

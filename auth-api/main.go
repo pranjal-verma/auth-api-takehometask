@@ -39,7 +39,8 @@ func initializeRoutes(router *gin.Engine, authHandler *handlers.AuthHandler, aut
 	{
 		auth.POST("/signup", authHandler.Signup)
 		auth.POST("/signin", authHandler.Signin)
-		// auth.POST("/refresh", middleware.AuthRequired(), handlers.RefreshToken)
+		auth.POST("/refresh", authHandler.RefreshToken)
 		// auth.POST("/revoke", middleware.AuthRequired(), handlers.RevokeToken)
+		auth.GET("/check", authMiddleware.AuthRequired(), authHandler.Ping)
 	}
 }

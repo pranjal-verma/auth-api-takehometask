@@ -11,6 +11,7 @@ import (
 type TokenService interface {
 	GenerateTokenPair(userID uint) (accessToken, refreshToken string, err error)
 	ValidateToken(tokenString string) (*Claims, error)
+	RefreshToken(tokenString string) (string, error)
 }
 
 type tokenService struct {
@@ -67,8 +68,26 @@ func (s *tokenService) ValidateToken(tokenString string) (*Claims, error) {
 	}
 
 	if claims, ok := token.Claims.(*Claims); ok && token.Valid {
+		if claims.ExpiresAt.Before(time.Now()) {
+			return nil, errors.New("token has expired")
+		}
 		return claims, nil
 	}
 
 	return nil, errors.New("invalid token")
+}
+
+// TODO: move to token service
+func (s *tokenService) RefreshToken(tokenString string) (string, error) {
+	claims, err := s.ValidateToken(tokenString)
+	if err != nil {
+		return "", err
+	}
+
+	accessToken, err := s.generateToken(claims.UserID, "access", config.AccessTokenDuration)
+	if err != nil {
+		return "", err
+	}
+
+	return accessToken, nil
 }
